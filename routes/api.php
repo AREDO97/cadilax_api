@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\api\AuditLogsController;
+use App\Http\Controllers\api\HintController;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\auth\authController;
 use Illuminate\Http\Request;
@@ -51,3 +52,17 @@ Route::delete('/log/{log}/delete',[AuditLogsController::class,'destroy'])->name(
 // delete old logs
 Route::delete('/logs/delete',[AuditLogsController::class,'clearAll'])->name('delete old logs');
 });
+
+// hints management
+Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function (){
+// create hint
+Route::post('/hint/create',[HintController::class,'create'])->name('create hint');
+// update hint
+Route::put('/hint/{hint}/update',[HintController::class,'update'])->name('update hint');
+// soft delete hint
+Route::delete('/hint/{hint}/delete',[HintController::class,'destroy'])
+->name('delete hint');
+});
+// show hints
+Route::get('/hints',[HintController::class,'index'])->middleware('auth:sanctum')
+->name('show hints');
