@@ -7,6 +7,7 @@ use App\Http\Controllers\api\HintController;
 use App\Http\Controllers\api\StakeController;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\WalletController;
+use App\Http\Controllers\api\WallettransactionsController;
 use App\Http\Controllers\auth\authController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -105,5 +106,14 @@ Route::get('/stakes',[StakeController::class,'index'])
 // wallet management
 Route::middleware(['auth:sanctum'])->group(function () {
 // create wallet
-Route::post('/wallet/create',[WalletController::class,'create']);
+Route::post('/wallet/{wallet}/deposit',[WalletController::class,'create']);
+});
+
+// wallet transactions management
+Route::middleware(['auth:sanctum'])->group(function () {
+//  wallet transactions
+Route::post('/wallet/transactions',[WallettransactionsController::class,'index']);
+// delete transaction
+Route::delete('/transaction/{transaction}/delete',[WallettransactionsController::class,'destroy']);
+
 });

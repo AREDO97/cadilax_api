@@ -1,54 +1,95 @@
 <?php
 
+use App\Models\Game;
 use App\Models\Hint;
 use App\Models\Stake;
-use App\Models\Game;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
-use App\Models\User;
 
-// create a game
-test('user can create a game ', function () {
-    $user = User::factory()->create();
+test('user can challenge a game', function () {
 
-Sanctum::actingAs($user);
+    // --------------------------------
+    // Create game creator
+    // --------------------------------
 
-$this->postJson('/api/wallet/create', [
-    'balance' => 5000.00,
-    'user_id' => $user->id,
-]);
+    $creator = User::factory()->create();
 
-$stake = Stake::factory()->create([
-    'amount' => 1000,
-    'status' => 'active',
-]);
+    $creator->wallet()->create([
+        'balance' => 5000.00,
+    ]);
 
-$hint = Hint::factory()->create();
+    // Authenticate as creator
+    Sanctum::actingAs($creator);
 
-$response = $this->postJson('/api/game/create', [
-    'hint_id' => $hint->id,
-    'color' => 'Red',
-    'stake_id' => $stake->id,
-]);
+    // --------------------------------
+    // Create stake
+    // --------------------------------
 
-$game = Game::latest()->first();
+    $stake = Stake::factory()->create([
+        'amount' => 1000,
+        'status' => 'active',
+    ]);
 
-$challenger = User::factory()->create();
+    // --------------------------------
+    // Create hint
+    // --------------------------------
 
-Sanctum::actingAs($challenger);
+    $hint = Hint::factory()->create();
 
-$this->postJson('/api/wallet/create', [
-    'balance' => 5000.00,
-    'user_id' => $challenger->id,
-]);
+    // --------------------------------
+    // Create game
+    // --------------------------------
 
-$response = $this->postJson("/api/game/{$game->id}/challenge", [
-    'color_guess' => 'red',
-]);
+    $gameResponse = $this->postJson('/api/game/create', [
+        'hint_id' => $hint->id,
+        'color' => 'red',
+        'stake_id' => $stake->id,
+    ]);
 
-$response->assertStatus(200);
-}); 
+    $gameResponse->assertStatus(200);
 
- 
+    // Get the actual game from database
+    $game = Game::latest()->first();
+
+    // Make sure game exists
+    expect($game)->not->toBeNull();
+
+    // --------------------------------
+    // Create challenger
+    // --------------------------------
+
+    $challenger = User::factory()->create();
+
+    $challenger->wallet()->create([
+        'balance' => 5000.00,
+    ]);
+
+    // --------------------------------
+    // Authenticate as challenger
+    // --------------------------------
+
+    Sanctum::actingAs($challenger);
+
+    // --------------------------------
+    // Challenge game
+    // --------------------------------
+
+    $response = $this->postJson("/api/game/{$game->id}/challenge", [
+        'color_guess' => 'red',
+    ]);
+
+    // Check response
+    $response->assertStatus(200);
+
+    // --------------------------------
+    // Check game was resolved
+    // --------------------------------
+
+    $this->assertDatabaseHas('games', [
+        'id' => $game->id,
+        'status' => 'resolved',
+    ]);
+});
