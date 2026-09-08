@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class HintController extends Controller
 {
-    // create hint, only admins can create hints
+    /*create hint, only admins can create hints */
     public function create(Request $request)
     {
         $admin=$request->user();
