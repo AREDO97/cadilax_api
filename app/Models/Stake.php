@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Hint extends Model
+class Stake extends Model
 {
-     use HasFactory;
     // allowed
+         use HasFactory;
+
     protected $fillable = [
-        'text',
-        'status'
+        'amount',
+        'status',
     ];
-    // hint games
+    // game
     public function games()
     {
         return $this->hasMany(Game::class);

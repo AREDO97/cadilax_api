@@ -1,8 +1,12 @@
 <?php
 
 use App\Http\Controllers\api\AuditLogsController;
+use App\Http\Controllers\api\GameChallengerController;
+use App\Http\Controllers\api\GameController;
 use App\Http\Controllers\api\HintController;
+use App\Http\Controllers\api\StakeController;
 use App\Http\Controllers\api\UserController;
+use App\Http\Controllers\api\WalletController;
 use App\Http\Controllers\auth\authController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -66,3 +70,40 @@ Route::delete('/hint/{hint}/delete',[HintController::class,'destroy'])
 // show hints
 Route::get('/hints',[HintController::class,'index'])->middleware('auth:sanctum')
 ->name('show hints');
+
+// games management
+Route::middleware(['auth:sanctum'])->group(function (){
+// create game
+Route::post('/game/create',[GameController::class,'create'])->name('create game');
+// cancel game
+Route::put('/game/{game}/cancel',[GameController::class,'cancel'])->name('cancel game');
+// view open games
+Route::get('/open/games',[GameController::class,'index'])->name('open games');
+});
+
+// game challenger management
+Route::middleware('auth:sanctum')->group(function () {
+// challenge game
+Route::post('/game/{game}/challenge',[GameChallengerController::class,'challengeGame'])
+->name('challenge game');
+});
+
+// stakes management
+Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function (){
+// create stake
+Route::post('/stake/create',[StakeController::class,'create']);
+// update stake
+Route::put('/stake/{stake}/update',[StakeController::class,'update']);
+// delete stakes
+Route::delete('/stake/{stake}/delete',[StakeController::class,'destroy']);
+
+});
+// view stakes
+Route::get('/stakes',[StakeController::class,'index'])
+->middleware('auth:sanctum');
+
+// wallet management
+Route::middleware(['auth:sanctum'])->group(function () {
+// create wallet
+Route::post('/wallet/create',[WalletController::class,'create']);
+});
