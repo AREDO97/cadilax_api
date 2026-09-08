@@ -37,7 +37,7 @@ class GameChallengerController extends Controller
             // create challenge
         $challengerBalance=$challenger->wallet->balance;
         // game stake
-        $gameStake=$game->stake;
+        $gameStake=$game->stake->amount;
         if ($challengerBalance < $gameStake)
             {
                 abort(403,'You have insufficient funds to take on these challenge');
