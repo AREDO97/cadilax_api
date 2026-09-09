@@ -37,4 +37,9 @@ class Game extends Model
     {
         return $this->belongsTo(Hint::class);
     }
+    // revenue
+    public function revenue()
+    {
+        return $this->belongsTo(PlatformRevenue::class);
+    }
 }

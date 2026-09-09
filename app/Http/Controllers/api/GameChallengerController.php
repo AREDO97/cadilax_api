@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Game;
 use App\Models\GameChallenger;
+use App\Models\PlatformRevenue;
+use App\Models\PlatformSetting;
+use App\Models\WalletTransaction;
 use Illuminate\Support\Facades\DB;
 
 class GameChallengerController extends Controller
@@ -19,7 +22,7 @@ class GameChallengerController extends Controller
         ->lockForUpdate()->first();
             //validation
             $request->validate([
-    'color_guess' => ['required', 'in:red,black'],
+                'color_guess' => ['required', 'in:red,black'],
                             ]);
              // user
         $challenger=$request->user();
@@ -44,19 +47,90 @@ class GameChallengerController extends Controller
             }
 
         // challenger balance
-        $challenger->wallet->decrement('balance',$gameStake);
+          $challenger->wallet->decrement('balance',$gameStake);
+          $challengerInitialAmount=$challenger->wallet->fresh()->balance;
+        /*
+         platform revenue computation
+         $userId,$gameId,$percentage,$amount,$type
+            */
+         // deduct from game creator platform revenue
+         // compute percenatge
+         $percentage=PlatformSetting::where('is_active',true)->first();
+         // compute amount
+         $amountCharged=($percentage->percentage/100) * $gameStake; 
+         PlatformRevenue::Collect(
+            $challenger->id,
+            $game->id,
+            $percentage->percentage,
+            $amountCharged,
+            'charged game creator'
+         );
+
+         // deduct from game creator platform revenue
+          PlatformRevenue::Collect(
+            $creator->id,
+            $game->id,
+            $percentage->percentage,
+            $amountCharged,
+            'charged game challenger'
+         );
         // compute result
         $creatorColor=$game->color;
         $challengerColor=$request->color_guess;
+        // compute actuall amount won
+        $amountBeforeTax=$gameStake * 2;
+        $amountAfterTax=$amountBeforeTax - ($amountCharged * 2);
+
+         // creator wallet amount
+            $creatorWalletAmount = $creator->wallet->balance;
+        /*
+        Wallet transactions
+        $walletId,$type,$amount,$balance_after,$reference* */
         if($creatorColor == $challengerColor)
             {
                 $result="won";
-                $challenger->wallet->increment('balance',$gameStake * 2);
+                $challenger->wallet->increment('balance',$amountAfterTax);
+                $challengerWalletAmount =$challenger->wallet->fresh()->balance;
+                // wallet transaction for challenger
+            WalletTransaction::Transaction(
+                $challenger->wallet->id,
+                'won game',
+                $amountAfterTax,
+                $challengerWalletAmount,
+                $game->id.' #'
+            );
+            // game creator transaction
+           
+             WalletTransaction::Transaction(
+                $creator->wallet->id,
+                'lost game',
+                $gameStake,
+                $creatorWalletAmount,
+                $game->id.' #'
+            );
             }
             else
                 {
                  $result="lost";
-                 $creator->wallet->increment('balance',$gameStake * 2);
+                 $creator->wallet->increment('balance',$amountAfterTax);
+                 $creatorWalletAmount = $creator->wallet->fresh()->balance;
+                 // compute creator transactions
+                WalletTransaction::Transaction(
+                $creator->wallet->id,
+                'won game',
+                $amountAfterTax,
+                $creatorWalletAmount,
+                $game->id.' #'
+            ); 
+
+            // challenger transaction computation
+              WalletTransaction::Transaction(
+                $challenger->wallet->id,
+                'lost game',
+                $gameStake,
+                $challengerInitialAmount,
+                $game->id.' #'
+            );
                 }
         // create challenge
         $challenge=GameChallenger::create([

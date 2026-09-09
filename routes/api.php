@@ -4,11 +4,14 @@ use App\Http\Controllers\api\AuditLogsController;
 use App\Http\Controllers\api\GameChallengerController;
 use App\Http\Controllers\api\GameController;
 use App\Http\Controllers\api\HintController;
+use App\Http\Controllers\api\PlatformSettingsController;
+use App\Http\Controllers\api\RevenueController;
 use App\Http\Controllers\api\StakeController;
 use App\Http\Controllers\api\UserController;
 use App\Http\Controllers\api\WalletController;
 use App\Http\Controllers\api\WallettransactionsController;
 use App\Http\Controllers\auth\authController;
+use App\Models\PlatformRevenue;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -92,28 +95,54 @@ Route::post('/game/{game}/challenge',[GameChallengerController::class,'challenge
 // stakes management
 Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function (){
 // create stake
-Route::post('/stake/create',[StakeController::class,'create']);
+Route::post('/stake/create',[StakeController::class,'create'])->name('create stake');
 // update stake
-Route::put('/stake/{stake}/update',[StakeController::class,'update']);
+Route::put('/stake/{stake}/update',[StakeController::class,'update'])->name('update stake');
 // delete stakes
-Route::delete('/stake/{stake}/delete',[StakeController::class,'destroy']);
+Route::delete('/stake/{stake}/delete',[StakeController::class,'destroy'])->name('delete stake');
 
 });
 // view stakes
 Route::get('/stakes',[StakeController::class,'index'])
-->middleware('auth:sanctum');
+->middleware('auth:sanctum')->name('view stakes');
 
 // wallet management
 Route::middleware(['auth:sanctum'])->group(function () {
 // create wallet
 Route::post('/wallet/{wallet}/deposit',[WalletController::class,'create']);
-});
+})->name('deposit money to wallet');
 
 // wallet transactions management
 Route::middleware(['auth:sanctum'])->group(function () {
 //  wallet transactions
-Route::post('/wallet/transactions',[WallettransactionsController::class,'index']);
+Route::get('/wallet/transactions',[WallettransactionsController::class,'index'])
+->name('wallet transactions');
 // delete transaction
-Route::delete('/transaction/{transaction}/delete',[WallettransactionsController::class,'destroy']);
+Route::delete('/transaction/{transaction}/delete',[WallettransactionsController::class,'destroy'])
+->name('delete wallet transaction');
 
 });
+
+// platform configuration settings
+Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function () {
+// create percentage
+Route::post('/percentage/create',[PlatformSettingsController::class,'create'])
+->name('create tax percentage');
+// update percentage
+Route::put('/percentage/{percentage}/update',[PlatformSettingsController::class,'update'])
+->name('update tax percentage');
+// delete percentage
+Route::delete('/percentage/{percentage}/delete',[PlatformSettingsController::class,'destroy'])
+->name('delete tax percentage');
+// view percentage
+Route::get('/current_percentage',[PlatformSettingsController::class,'index'])
+->name('view curent tax percentage');
+
+});
+
+// platform revenue management
+Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function () {
+// view total platform revenue
+Route::get('/platform/revenue',[RevenueController::class,'index'])->name('total Revenue');
+});
+

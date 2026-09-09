@@ -4,6 +4,7 @@ use App\Models\Game;
 use App\Models\Hint;
 use App\Models\Stake;
 use App\Models\User;
+use App\Models\PlatformSetting;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
@@ -21,7 +22,6 @@ test('user can challenge a game', function () {
         'balance' => 5000.00,
     ]);
 
-    // Authenticate as creator
     Sanctum::actingAs($creator);
 
     // --------------------------------
@@ -40,6 +40,15 @@ test('user can challenge a game', function () {
     $hint = Hint::factory()->create();
 
     // --------------------------------
+    // Create platform setting
+    // --------------------------------
+
+    PlatformSetting::create([
+        'percentage' => 5,
+        'is_active' => true,
+    ]);
+
+    // --------------------------------
     // Create game
     // --------------------------------
 
@@ -51,10 +60,12 @@ test('user can challenge a game', function () {
 
     $gameResponse->assertStatus(200);
 
-    // Get the actual game from database
+    // --------------------------------
+    // Get actual game
+    // --------------------------------
+
     $game = Game::latest()->first();
 
-    // Make sure game exists
     expect($game)->not->toBeNull();
 
     // --------------------------------
@@ -81,7 +92,10 @@ test('user can challenge a game', function () {
         'color_guess' => 'red',
     ]);
 
+    // --------------------------------
     // Check response
+    // --------------------------------
+
     $response->assertStatus(200);
 
     // --------------------------------
