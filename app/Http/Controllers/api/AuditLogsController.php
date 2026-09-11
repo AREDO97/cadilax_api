@@ -34,4 +34,5 @@ class AuditLogsController extends Controller
         'message' => 'Old logs deleted successfully'
     ]);
 }
+
 }

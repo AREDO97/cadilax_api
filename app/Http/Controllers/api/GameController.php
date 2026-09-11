@@ -9,6 +9,8 @@ use App\Models\Stake;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use function Pest\Laravel\json;
+
 class GameController extends Controller
 {
     // create game
@@ -87,5 +89,12 @@ class GameController extends Controller
         $games=Game::where('status','open')->latest()->paginate(10);
         // response
         return GameResource::collection($games);
+    }
+    // user games
+    public function userGames(Request $request)
+    {
+        $user=$request->user();
+        $userGames=Game::where('creator_id',$user->id)->get();
+        return response()->json($userGames);
     }
 }
