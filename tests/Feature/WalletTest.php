@@ -9,15 +9,17 @@ use App\Models\User;
 
 // view all suspended users
 test('users can add money to wallets ', function () {
-    // create admin
-    $user = User::factory()->create();
-    // logged in user
-    Sanctum::actingAs($user);
-    // register user
-  
-    $response = $this->postJson('/api/wallet/create',[
-        'balance'=>1000.00
-    ]);
+   $user = User::factory()->create();
 
-    $response->assertStatus(200);
+$wallet = $user->wallet()->create([
+    'balance' => 0,
+]);
+
+Sanctum::actingAs($user);
+
+$response = $this->postJson("/api/wallet/{$wallet->id}/deposit", [
+    'balance' => 1000.00,
+]);
+
+$response->assertStatus(200);
 });

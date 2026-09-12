@@ -40,5 +40,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(Game::class,'creator_id');
     }
-    
+    // inquiries
+    public function inquiries()
+    {
+        return $this->hasMany(Inquiry::class);
+    }
+
+     // inquiry replies
+    public function inquiryReplies()
+    {
+        return $this->hasMany(InquiryReply::class);
+    }
+    // guidanceRequests
+    public function guidanceRequests()
+    {
+        return $this->hasMany(GuidanceRequest::class);
+    }
+    // guidance reply
+    public function guidance_replies()
+    {
+        return $this->hasMany(GuidanceReply::class);
+    }
 }

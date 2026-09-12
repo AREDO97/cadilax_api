@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Game extends Model
 {
+             use HasFactory;
+
     // allowed
     protected $fillable = [
         'creator_id',
@@ -33,5 +36,10 @@ class Game extends Model
     public function hint()
     {
         return $this->belongsTo(Hint::class);
+    }
+    // revenue
+    public function revenue()
+    {
+        return $this->belongsTo(PlatformRevenue::class);
     }
 }

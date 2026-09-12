@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Profile;
+use App\Models\Wallet;
 use App\Notifications\newAccountCreation;
 use Illuminate\Validation\Rules\Password;
 
@@ -31,7 +32,11 @@ public function register(Request $request)
         'password' => Hash::make($request->password)
     ]);
 
-
+    // create wallet
+    $wallet = Wallet::create([
+            'user_id'=>$user->id,
+            'balance'=>0000.00
+    ]);
     // Token 
     $token = $user->createToken('auth-token');
     // log action
