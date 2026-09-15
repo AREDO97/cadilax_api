@@ -97,4 +97,41 @@ class GameController extends Controller
         $userGames=Game::where('creator_id',$user->id)->get();
         return response()->json($userGames);
     }
+    // games statics
+    public function gameSummary(Request $request)
+    {
+               $admin=$request->user();
+    if($admin->role !== 'admin' && $admin->role !== 'super_admin')
+        {
+        abort(403,'Unauthorised action');
+        }
+        // overal total games played
+        $totalgamesPlayed=Game::all()->count();
+        // total games played today
+        $totalgamesToday=Game::whereDate('created_at',today())->count();
+        // total games played yesterday
+        $totalgamesYesterday=Game::whereDate('created_at',today()->subDay())->count();
+        // difference
+        $gameDifference=$totalgamesToday - $totalgamesYesterday ;
+        // comparison
+        if($gameDifference > 0)
+            {
+                $comparison= abs($gameDifference). " more than yesterday" ;
+            }
+            if($gameDifference == 0)
+                {
+                $comparison= abs($totalgamesToday). ", which is the same as yesterday" ;   
+                }
+                   if($gameDifference < 0)
+                    {
+                        $comparison = abs($gameDifference). "less than yesterday";
+                    }
+        // response
+        return response()->json([
+            'total_games_played'=>$totalgamesPlayed,
+            'total_games_today'=>$totalgamesToday,
+            'total_yesterday_games'=>$totalgamesYesterday,
+            'daily_comparisons'=>$comparison
+        ]);
+    }
 }

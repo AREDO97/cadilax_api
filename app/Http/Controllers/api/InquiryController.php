@@ -11,7 +11,8 @@ use Illuminate\Http\Request;
 class InquiryController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * view all user inquiries.
+     * admins only allowed.
      */
     public function index(Request $request)
     {
@@ -28,7 +29,8 @@ class InquiryController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * create an inquiry.
+     * all users allowed to send an inquiry
      */
     public function store(Request $request)
     {
@@ -63,23 +65,28 @@ class InquiryController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the sinquiry statistics.
      */
-    public function show(string $id)
+    public function show(Request $request)
     {
-        //
+        // inquiry stats
+        $totalInquiries=Inquiry::all()->count();
+        $inquiriesToday=Inquiry::whereDate('created_at',today())->count();
+        $totalRepliedInquiries=Inquiry::whereDate('created_at',today())
+        ->where('is_replied',true)->count();
+        // return response
+        return response()->json([
+            'total_inquiries'=>$totalInquiries,
+            'total_inquiries_today'=>$inquiriesToday,
+            'total_replied_inquiries_today'=>$totalRepliedInquiries
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
+ /**
+     * Delete an inquiry
+     *
+     * Permanently remove the specified inquiry record from the database.
+     * admins only allowed to perform action
      */
     public function destroy(Request $request ,Inquiry $inquiry)
     {

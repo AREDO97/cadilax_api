@@ -61,4 +61,15 @@ class User extends Authenticatable
     {
         return $this->hasMany(GuidanceReply::class);
     }
+    // game invitations
+    public function gameInvitations()
+    {
+        return $this->hasMany(GameInvitation::class,'invitedUser_id');
+    }
+    // invitations sent
+    public function sentInvitations()
+    {
+        return $this->hasMany(GameInvitation::class,'invitedBy_id');
+    }
+
 }

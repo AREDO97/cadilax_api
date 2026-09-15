@@ -47,7 +47,16 @@ public function register(Request $request)
         $user->name . ' created an account successfully'
     );
 
-// response
+    // notify admins
+        $admins=User::whereIn('role',['admin','super_admin'])
+        ->get();
+        foreach ($admins as $admin)
+            {
+                $admin->notify(
+                    new newAccountCreation($user->name)
+                );
+            }
+    // response
     return response()->json([
         'message' => 'Account created successfully',
         'user'    => $user,

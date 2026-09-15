@@ -132,9 +132,9 @@ public function makeAdmin(User $user)
 }
 // demote role to user
 
-public function demoteAdmin(User $user)
+public function demoteAdmin(Request $request,User $user)
 {
-     $admin=auth()->user();
+     $admin=$request->user();
     if($admin->role !== 'admin' && $admin->role !== 'super_admin'){
         abort(403,'Unauthorised');
     }
@@ -147,9 +147,9 @@ public function demoteAdmin(User $user)
 
     // log out event
         AuditLog::Log(
-            auth()->user()->id,
+            $admin->id,
             'Admin Demotion',
-            auth()->user()->name.' demoted '.$user->name.' to a user'
+            $admin->name.' demoted '.$user->name.' to a user'
         );
 // response
 
@@ -169,5 +169,41 @@ public function demoteAdmin(User $user)
             'user'=>$user,
             'logs'=>$logs
         ]);
+    }
+
+    // user stats summary
+    public function userSummary(Request $request)
+    {
+         $admin=$request->user();
+    if($admin->role !== 'admin' && $admin->role !== 'super_admin'){
+        abort(403,'Unauthorised action');
+    }
+    // total number of users
+    $total_users=User::all()->count();
+    // users today
+    $total_users_today=User::whereDate('created_at',today())
+    ->count();
+    // users created yesterday
+    $totalYesterday=User::whereDate('created_at',today()->subDay())->count();
+    // total users this month
+    $totalMonthly=User::whereBetween('created_at',[
+        today()->startOfMonth(),
+        today()->endOfMonth()
+    ])->count();
+    // total last month
+     $totalLastMonth=User::whereBetween('created_at',[
+        today()->subMonth()->startOfMonth(),
+        today()->subMonth()->endOfMonth()
+    ])->count();
+
+    // response
+    return response()->json([
+        'total_users'=>$total_users,
+        'today_accounts_created'=>$total_users_today,
+        'total_yesterday'=>$totalYesterday,
+        'total_current_month'=>$totalMonthly,
+        'total_last_month'=>$totalLastMonth
+    ]);
+
     }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\api\AuditLogsController;
 use App\Http\Controllers\api\GameChallengerController;
 use App\Http\Controllers\api\GameController;
+use App\Http\Controllers\api\GameInvitationsController;
 use App\Http\Controllers\api\GuidanceReplyController;
 use App\Http\Controllers\api\GuidanceRequestsController;
 use App\Http\Controllers\api\HintController;
@@ -52,7 +53,9 @@ Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function ()
     Route::get('/users/suspended', [UserController::class, 'viewSuspended'])->name('suspended users');
     // unsuspend user
      Route::patch('/users/unsuspend/{user}', [UserController::class, 'unsuspend'])->name('unsuspend user');
-    
+    // users stats summary
+    Route::get('/users_stats/summary',[UserController::class,'userSummary'])
+    ->name('user_stats summary');
 });
 
 // audit logs management
@@ -93,6 +96,10 @@ Route::get('/open/games',[GameController::class,'index'])->name('open games');
 Route::get('/games/user_games',[GameController::class,'userGames'])
 ->name('user games');
 });
+
+Route::get('/games_stats/summary',[GameController::class,'gameSummary'])
+->middleware(['auth:sanctum','role:admin,super_admin'])
+->name('game_stats summary');
 
 // game challenger management
 Route::middleware('auth:sanctum')->group(function () {
@@ -160,20 +167,25 @@ Route::get('/current_percentage',[PlatformSettingsController::class,'index'])
 Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function () {
 // view total platform revenue
 Route::get('/platform/revenue',[RevenueController::class,'index'])->name('total Revenue');
+// revenue summary
+Route::get('/revenue/summary',[RevenueController::class,'revenueSummary'])
+->name('revenue summary');
 });
 
 // inquiry management
 Route::post('/inquiry/create',[InquiryController::class,'store'])
 ->middleware('auth:sanctum')->name('create inquiry');
-// inquiy management admins only
 Route::middleware(['auth:sanctum','role:admin,super_admin'])->group(function () {
-
+// inquiry stats
+Route::get('/inquiry_stats/summary',[InquiryController::class,'show'])
+->name('inquiry_stats summary');
 // view all inquiries
 Route::get('/inquiries',[InquiryController::class,'index'])
 ->name('view inquiries');
 // delete inquiry
 Route::delete('/inquiry/{inquiry}/delete',[InquiryController::class,'destroy'])
 ->name('delete inquiry');
+
 });
 
 // notifications
@@ -237,3 +249,16 @@ Route::delete('/guidance_request/{guidance}/delete',[GuidanceRequestsController:
 // guidance request reply
 Route::post('/guidance_request/{guidance}/reply',[GuidanceReplyController::class,'create'])
 ->middleware(['auth:sanctum','role:admin,super_admin'])->name('reply guidance_request');
+
+// game invitations controller
+Route::middleware(['auth:sanctum'])->group(function (){
+// send invitation
+Route::post('/invitation/{game}/send',[GameInvitationsController::class,'sendInvitation'])
+->name('send game_invitation');
+// user game invitations userInvitations
+Route::get('/user_game_invitation',[GameInvitationsController::class,'userInvitations'])
+->name('user game_invitations');
+// accept invitation acceptInvitation
+Route::put('/accept/{invitation}',[GameInvitationsController::class,'acceptInvitation'])
+->name('accept game_invitation');
+});

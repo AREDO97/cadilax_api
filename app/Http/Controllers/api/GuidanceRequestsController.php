@@ -32,7 +32,7 @@ class GuidanceRequestsController extends Controller
             {
                 $super->notify(
                 new guidanceGuiandanceInquiry(
-                    "user",
+                    $guidance_request->user->name,
                     $guidance_request->category
                 )
                 );

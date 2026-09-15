@@ -42,4 +42,9 @@ class Game extends Model
     {
         return $this->belongsTo(PlatformRevenue::class);
     }
+    // invitations
+    public function invitations()
+    {
+        return $this->hasMany(GameInvitation::class);
+    }
 }
