@@ -32,6 +32,13 @@ Route::post('/login',[authController::class,'login'])->middleware('throttle:3,1'
 Route::post('/logout',[authController::class,'logout'])->middleware('auth:sanctum')
 ->name('logout');
 
+// google oauth
+Route::get('/oauth/google', [AuthController::class, 'google']);
+Route::get('/oauth/google/callback', [AuthController::class, 'googleCallback']);
+
+// forgot password
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+
 // user management
 // all users
 Route::get('/users',[UserController::class,'index'])
