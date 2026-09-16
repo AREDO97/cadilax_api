@@ -11,8 +11,9 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Profile;
 use App\Models\Wallet;
 use App\Notifications\newAccountCreation;
-use Illuminate\Validation\Rules\Password;
-
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str; 
+use Illuminate\Support\Facades\Password;
 class AuthController extends Controller
 {
     // create user
@@ -69,7 +70,8 @@ public function register(Request $request)
     // 1. Validation
     $request->validate([
         'email' => 'required|email',
-        'password' => 'required'
+        'password' => 'required',
+        'remembere'=>'sometimes|boolean'
     ]);
 
     // 2. Fetch user from DB
@@ -98,9 +100,16 @@ if ($user->status !== 'active') {
             'message' => 'Invalid email or password'
         ], 401);
     }
+    // generate remember me token
+    $expiresAt=$request->boolean('remember')
+    ?  now()->addDays(30)
+    : now()->addMinutes(30);
 
     // 4. Generate plain text token
-    $token = $user->createToken('auth-token')->plainTextToken;
+    $token = $user->createToken('auth-token'
+    ,
+    [],
+    $expiresAt );
         // audit log
     AuditLog::Log(
         $user->id,
@@ -123,4 +132,63 @@ if ($user->status !== 'active') {
         'message' => 'Logged out successfully'
     ], 200);
 }
+
+
+// google oauth
+
+public function google()
+{
+    // Add ->stateless() before ->redirect()
+    return Socialite::driver('google')->stateless()->redirect();
 }
+
+public function googleCallback()
+{
+    // Add ->stateless() here as well when retrieving the user
+    $googleUser = Socialite::driver('google')->stateless()->user();
+
+    // Find or create the user in your database
+    $user = User::updateOrCreate([
+        'email' => $googleUser->getEmail(),
+    ], [
+        'name' => $googleUser->getName(),
+        'google_id' => $googleUser->getId(),
+        'password' => bcrypt(Str::random(16)), // or null if password field allows it
+    ]);
+
+    // Generate Sanctum Token for API response
+    $token = $user->createToken('auth_token');
+
+    return response()->json([
+        'status' => 'success',
+        'token' => $token,
+        'user' => $user
+    ]);
+}
+
+// forgot password endpoint
+public function forgotPassword(Request $request)
+{
+    $request->validate([
+        'email' => ['required', 'email'],
+    ]);
+
+    $status = Password::sendResetLink(
+        $request->only('email')
+    );
+
+    if ($status === Password::RESET_LINK_SENT) {
+        return response()->json([
+            'message' => 'Password reset link sent successfully.'
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Unable to send password reset link.'
+    ], 422);
+}
+}
+
+
+
+
