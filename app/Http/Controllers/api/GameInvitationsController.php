@@ -149,8 +149,8 @@ status* */
         if($creatorColor == $challengerColor)
             {
                 $result="won";
-                $challenger->wallet->increment('balance',$amountAfterTax);
-                $challengerWalletAmount =$challenger->wallet->fresh()->balance;
+                $challenger->wallet->increment('balance',$amountAfterTax + $gameStake);
+                $challengerWalletAmount = $challenger->wallet->fresh()->balance;
                 // wallet transaction for challenger
             WalletTransaction::Transaction(
                 $challenger->wallet->id,
@@ -172,7 +172,7 @@ status* */
             else
                 {
                  $result="lost";
-                 $creator->wallet->increment('balance',$amountAfterTax);
+                 $creator->wallet->increment('balance',$amountAfterTax + $gameStake);
                  $creatorWalletAmount = $creator->wallet->fresh()->balance;
                  // compute creator transactions
                 WalletTransaction::Transaction(
@@ -286,7 +286,7 @@ status* */
         if($creatorColor == $challengerColor)
             {
                 $result="won";
-                $challenger->wallet->increment('balance',$amountAfterTax);
+                $challenger->wallet->increment('balance',$amountAfterTax + $gameStake);
                 $challengerWalletAmount =$challenger->wallet->fresh()->balance;
                 // wallet transaction for challenger
             WalletTransaction::Transaction(
@@ -309,7 +309,7 @@ status* */
             else
                 {
                  $result="lost";
-                 $creator->wallet->increment('balance',$amountAfterTax);
+                 $creator->wallet->increment('balance',$amountAfterTax + $gameStake);
                  $creatorWalletAmount = $creator->wallet->fresh()->balance;
                  // compute creator transactions
                 WalletTransaction::Transaction(
