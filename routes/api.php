@@ -228,11 +228,11 @@ Route::patch('/password/update',[SettingsController::class,'updatePassword'])
 ->name('update password');
 
 // update username and email  updateUserInfo
-Route::post('/username/update',[SettingsController::class,'updateUserInfo'])
+Route::patch('/username/update',[SettingsController::class,'updateUserInfo'])
 ->name('update name or email');
 
 // delete account
-Route::post('/deleteAccount',[SettingsController::class,'deleteAccount'])
+Route::delete('/deleteAccount',[SettingsController::class,'deleteAccount'])
 ->name('delete account');
 
 });

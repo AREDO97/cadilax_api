@@ -19,7 +19,7 @@ class InquiryReplyController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * only admins can reply to an inquiry.
      */
     public function store(Request $request,Inquiry $inquiry)
     {

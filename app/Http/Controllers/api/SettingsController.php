@@ -13,6 +13,8 @@ class SettingsController extends Controller
     // settings 
     public function updatePassword(Request $request)
     {
+        // user
+        $user=$request->user();
 
         $request->validate([
             'current_password'=>'required',

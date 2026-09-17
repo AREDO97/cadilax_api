@@ -69,6 +69,12 @@ class InquiryController extends Controller
      */
     public function show(Request $request)
     {
+            // enforce admins
+         $admin=$request->user();
+    if($admin->role !== 'admin' && $admin->role !== 'super_admin')
+        {
+        abort(403,'Unauthorised action');
+        }
         // inquiry stats
         $totalInquiries=Inquiry::all()->count();
         $inquiriesToday=Inquiry::whereDate('created_at',today())->count();
