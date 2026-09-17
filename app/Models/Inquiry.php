@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 
 class Inquiry extends Model
 {
@@ -10,6 +12,8 @@ class Inquiry extends Model
     /*
 category, subject, message
 * */
+     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'category',
