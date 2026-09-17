@@ -50,7 +50,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => '',
+        'description' => 'cadilax api documentation',
     ],
 
     'ui' => [
@@ -110,8 +110,9 @@ return [
      * ],
      * ```
      */
-    'servers' => null,
-
+'servers' => [
+    'Production' => 'https://cadilax-api.onrender.com/api',
+],
     /**
      * Determines how Scramble stores the descriptions of enum cases.
      * Available options:
