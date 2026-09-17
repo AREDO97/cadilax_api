@@ -110,8 +110,9 @@ return [
      * ],
      * ```
      */
-    'servers' => null,
-
+'servers' => [
+    'Production' => 'https://cadilax-api.onrender.com/api',
+],
     /**
      * Determines how Scramble stores the descriptions of enum cases.
      * Available options:
