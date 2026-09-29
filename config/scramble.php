@@ -111,6 +111,7 @@ return [
      * ```
      */
 'servers' => [
+    'local'=>'http:localhost:8000',
     'Production' => 'https://cadilax-api.onrender.com/api',
 ],
     /**

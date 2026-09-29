@@ -48,9 +48,9 @@ public function update(Request $request,User $user)
     ];
 }
 // soft delete
-public function softDelete(User $user)
+public function softDelete(Request $request,User $user)
 {
-     $admin=auth()->user();
+     $admin=$request->user();
     if($admin->role !== 'admin' && $admin->role !== 'super_admin'){
         abort(403,'Unauthorised action');
     }
@@ -73,10 +73,10 @@ public function softDelete(User $user)
 }
 
 // unsuspend user
-public function unsuspend(User $user)
+public function unsuspend(Request $request,User $user)
 {
-
-    $admin=auth()->user();
+    // enforce admins
+    $admin=$request->user();
     if($admin->role !== 'admin' && $admin->role !== 'super_admin'){
         abort(403,'Unauthorised action');
     }
@@ -86,9 +86,9 @@ public function unsuspend(User $user)
 
 // log out event
        AuditLog::Log(
-     auth()->id(),
+     $admin->id,
     'User Unsuspension',
-    auth()->user()->name.' unsuspended '.$user->name
+    $admin->name.' unsuspended '.$user->name
 );
 
     return response()->json([
@@ -107,9 +107,9 @@ public function viewSuspended()
 }
 
 // change role to admin
-public function makeAdmin(User $user)
+public function makeAdmin(Request $request,User $user)
 {
-    $admin=auth()->user();
+    $admin=$request->user();
     if($admin->role !== 'admin' && $admin->role !== 'super_admin'){
         abort(403,'Unauthorised action');
     }
@@ -120,9 +120,9 @@ public function makeAdmin(User $user)
      
     // log out event
         AuditLog::Log(
-            auth()->user()->id,
+            $admin->id,
             'Admin Creation',
-            auth()->user()->name.' made '.$user->name.' an admin'
+            $admin->name.' made '.$user->name.' an admin'
         );
 
     return [

@@ -74,6 +74,11 @@ class WalletController extends Controller
             {
                 abort(405,'Insufficient wallet balance');
             }
+        // wallet amount > 3k
+         if($request->amount < 3000)
+            {
+                abort(405,'You can withdraw at least 3000');
+            }
         // decrease wallet balance
         $wallet->decrement('balance',$request->amount);
         $userNewBalance=$wallet->fresh()->balance;
