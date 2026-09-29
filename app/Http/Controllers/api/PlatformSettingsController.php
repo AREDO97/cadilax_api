@@ -68,8 +68,13 @@ class PlatformSettingsController extends Controller
         ]);
     }
     // current percentage
-    public function index()
+    public function index(Request $request)
     {
+          // enforce admins only
+        $admin=$request->user();
+    if($admin->role !== 'admin' && $admin->role !== 'super_admin'){
+        abort(403,'Unauthorised action');
+    }
         $percenatage=PlatformSetting::where('is_active',true)->first();
         return response()->json($percenatage);
     }
