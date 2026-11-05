@@ -12,17 +12,20 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
-    })
     ->withMiddleware(function (Middleware $middleware) {
-    $middleware->trustProxies(at: '*');
-})
-      ->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias([
-        'role' => \App\Http\Middleware\CheckRole::class,
-    ]);
-})
+        // Trust all proxies (essential for Render / load balancers)
+        $middleware->trustProxies(at: '*');
+
+        // Exclude your GosentePay webhook from CSRF verification
+        $middleware->validateCsrfTokens(except: [
+            'api/gosente/webhook',
+        ]);
+
+        // Register custom middleware aliases
+        $middleware->alias([
+            'role' => \App\Http\Middleware\CheckRole::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),

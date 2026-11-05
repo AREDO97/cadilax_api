@@ -140,6 +140,14 @@ Route::post('/wallet/{wallet}/withdraw',[WalletController::class,'withdraw'])
 // user wallet
 Route::get('/user_wallet',[WalletController::class,'index'])
 ->name('user wallet');
+// deposit
+Route::post('/deposit/wallet',[WalletController::class,'initiatePayment']);
+// withdraw
+Route::post('/withdraw/wallet',[WalletController::class,'initiateWithdrawal']);
+// web hook
+Route::post('/gosente/webhook', [WalletController::class, 'handleWebhook'])->name('api.gosente.webhook');
+
+
 });
 
 // wallet transactions management

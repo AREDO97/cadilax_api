@@ -7,6 +7,8 @@ use App\Models\Wallet;
 use App\Models\WalletTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Services\GosentePayService;
+use App\Models\Deposit;
 
 class WalletController extends Controller
 {
@@ -107,4 +109,84 @@ class WalletController extends Controller
         // response
         return response()->json($userWallet);
     }
+
+   
+
+    public function initiatePayment(Request $request, GosentePayService $gosente)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+            'amount' => 'required|numeric|min:500',
+            'email' => 'required|email',
+        ]);
+
+        $reference = 'GPS-ORD-' . uniqid();
+
+        // 1. Save record as pending in database first
+        $deposit = Deposit::create([
+            'reference' => $reference,
+            'phone' => $request->phone,
+            'amount' => $request->amount,
+            'email' => $request->email,
+            'status' => 'pending',
+        ]);
+
+        // 2. Trigger the gateway request
+        $response = $gosente->deposit([
+            'phone'    => $request->phone,
+            'amount'   => $request->amount,
+            'email'    => $request->email,
+            'ref'      => $reference,
+            'callback' => route('api.gosente.webhook'),
+        ]);
+
+        // Optional: Save initial gateway response payload
+        $deposit->update(['gateway_response' => $response]);
+
+        return response()->json([
+            'reference' => $reference,
+            'gateway_response' => $response,
+        ]);
+    }
+
+    public function handleWebhook(Request $request)
+    {
+        $data = $request->all();
+
+        $reference = $data['ref'] ?? null;
+        $status = $data['status'] ?? null; // e.g., 'successful' or 'failed'
+
+        if ($reference) {
+            // Find deposit by reference and update status automatically
+            $deposit = Deposit::where('reference', $reference)->first();
+
+            if ($deposit) {
+                $deposit->update([
+                    'status' => $status === 'successful' ? 'successful' : 'failed',
+                    'gateway_response' => $data,
+                ]);
+            }
+        }
+
+        return response()->json(['status' => 'received'], 200);
+    }
+
+    public function initiateWithdrawal(Request $request, GosentePayService $gosente)
+    {
+        $reference = 'GPS-PO-' . uniqid();
+
+        $response = $gosente->withdraw([
+            'phone'  => $request->phone,
+            'amount' => $request->amount,
+            'email'  => $request->email,
+            'reason' => 'Sandbox test payout',
+            'ref'    => $reference,
+        ]);
+
+        return response()->json([
+            'reference' => $reference,
+            'gateway_response' => $response,
+        ]);
+    }
+
 }
