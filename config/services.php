@@ -37,6 +37,10 @@ return [
     'redirect' => env('GOOGLE_REDIRECT_URI'),
 
 ],
+'gosente' => [
+        'api_key'    => env('GOSENTE_API_KEY'),
+        'secret_key' => env('GOSENTE_SECRET_KEY'),
+    ],
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
