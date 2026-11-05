@@ -15,8 +15,8 @@ use App\Http\Controllers\api\RevenueController;
 use App\Http\Controllers\api\SettingsController;
 use App\Http\Controllers\api\StakeController;
 use App\Http\Controllers\api\UserController;
-use App\Http\Controllers\api\WalletController;
 use App\Http\Controllers\api\WallettransactionsController;
+use App\Http\Controllers\api\WalletController; // <--- ADD THIS LINE HERE
 use App\Http\Controllers\auth\AuthController;
 use App\Models\PlatformRevenue;
 use Illuminate\Http\Request;
@@ -144,11 +144,12 @@ Route::get('/user_wallet',[WalletController::class,'index'])
 Route::post('/deposit/wallet',[WalletController::class,'initiatePayment']);
 // withdraw
 Route::post('/withdraw/wallet',[WalletController::class,'initiateWithdrawal']);
+
+});
+
 // web hook
 Route::post('/gosente/webhook', [WalletController::class, 'handleWebhook'])->name('api.gosente.webhook');
 
-
-});
 
 // wallet transactions management
 Route::middleware(['auth:sanctum'])->group(function () {
